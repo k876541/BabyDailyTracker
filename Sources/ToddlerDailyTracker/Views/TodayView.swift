@@ -41,10 +41,12 @@ struct TodayView: View {
                     .listRowBackground(Color.clear)
             }
 
-            switch selected {
-            case .meal: meals
-            case .sleep: sleeps
-            case .diaper: diapers
+            Section("今日時間軸") {
+                if viewModel.timeline.isEmpty { emptyRow("今天還沒有紀錄") }
+                ForEach(viewModel.timeline) { item in
+                    Button { edit(item) } label: { TimelineRow(item: item) }
+                }
+                .onDelete(perform: deleteTimelineItems)
             }
         }
         .listStyle(.plain)
@@ -113,13 +115,16 @@ struct TodayView: View {
             selected = kind
             switch kind {
             case .meal: editor = .meal(nil)
-            case .sleep: editor = .sleep(nil)
+            case .sleep:
+                if viewModel.activeSleep == nil { _ = viewModel.startSleep() }
+                else { _ = viewModel.finishActiveSleep() }
             case .diaper: editor = .diaper(nil)
             }
         } label: {
             VStack(spacing: 9) {
                 Image(systemName: icon).font(.title3).foregroundStyle(selected == kind ? .white : .primary)
-                Text(kind.rawValue).font(.caption.weight(.semibold)).foregroundStyle(selected == kind ? .white : .primary)
+                Text(kind == .sleep && viewModel.activeSleep != nil ? "醒來" : kind.rawValue)
+                    .font(.caption.weight(.semibold)).foregroundStyle(selected == kind ? .white : .primary)
             }
             .frame(maxWidth: .infinity).padding(.vertical, 14)
             .background(selected == kind ? BabyTheme.primary : color, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
@@ -146,7 +151,7 @@ struct TodayView: View {
             ForEach(viewModel.sleeps) { item in
                 Button { editor = .sleep(item) } label: {
                     RecordRow(
-                        title: "\(item.startedAt.formatted(date: .omitted, time: .shortened))–\(item.endedAt.formatted(date: .omitted, time: .shortened))",
+                        title: sleepTitle(item),
                         date: item.startedAt,
                         note: item.note
                     )
@@ -154,6 +159,12 @@ struct TodayView: View {
             }
             .onDelete { offsets in offsets.forEach { viewModel.delete(viewModel.sleeps[$0]) } }
         }
+    }
+
+    private func sleepTitle(_ item: SleepRecord) -> String {
+        let start = item.startedAt.formatted(date: .omitted, time: .shortened)
+        guard let end = item.endedAt else { return "\(start)–睡眠中" }
+        return "\(start)–\(end.formatted(date: .omitted, time: .shortened))"
     }
 
     private var diapers: some View {
@@ -182,6 +193,53 @@ struct TodayView: View {
 
     private func emptyRow(_ text: String) -> some View {
         Text(text).foregroundStyle(.secondary)
+    }
+
+    private func edit(_ item: DailyTimelineItem) {
+        switch item.kind {
+        case .meal: editor = viewModel.meals.first { $0.recordedAt == item.eventDate }.map(DailyEditor.meal)
+        case .sleep: editor = viewModel.sleeps.first { $0.startedAt == item.eventDate }.map(DailyEditor.sleep)
+        case .diaper: editor = viewModel.diapers.first { $0.recordedAt == item.eventDate }.map(DailyEditor.diaper)
+        }
+    }
+
+    private func deleteTimelineItems(at offsets: IndexSet) {
+        let items = viewModel.timeline
+        for offset in offsets {
+            let item = items[offset]
+            switch item.kind {
+            case .meal:
+                if let record = viewModel.meals.first(where: { $0.recordedAt == item.eventDate }) { viewModel.delete(record) }
+            case .sleep:
+                if let record = viewModel.sleeps.first(where: { $0.startedAt == item.eventDate }) { viewModel.delete(record) }
+            case .diaper:
+                if let record = viewModel.diapers.first(where: { $0.recordedAt == item.eventDate }) { viewModel.delete(record) }
+            }
+        }
+    }
+}
+
+private struct TimelineRow: View {
+    let item: DailyTimelineItem
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon).frame(width: 30, height: 30).background(color.opacity(0.18), in: Circle()).foregroundStyle(color)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(item.title).font(.body.weight(.medium))
+                Text(item.eventDate.formatted(date: .omitted, time: .shortened)).font(.caption).foregroundStyle(.secondary)
+                if !item.detail.isEmpty { Text(item.detail).font(.caption).foregroundStyle(.secondary) }
+            }
+        }
+        .padding(.vertical, 3)
+    }
+
+    private var icon: String {
+        switch item.kind { case .meal: "fork.knife"; case .sleep: "moon.stars.fill"; case .diaper: "drop.fill" }
+    }
+
+    private var color: Color {
+        switch item.kind { case .meal: BabyTheme.primary; case .sleep: .purple; case .diaper: .green }
     }
 }
 
@@ -212,6 +270,9 @@ private struct MealEditor: View {
     @State private var kind: String
     @State private var content: String
     @State private var note: String
+    @State private var amountText: String
+    @State private var unit: String
+    @State private var validationMessage: String?
 
     init(record: MealRecord?, onSave: @escaping (MealRecord) -> Bool) {
         self.record = record; self.onSave = onSave
@@ -219,18 +280,43 @@ private struct MealEditor: View {
         _kind = State(initialValue: record?.kind ?? "正餐")
         _content = State(initialValue: record?.content ?? "")
         _note = State(initialValue: record?.note ?? "")
+        _amountText = State(initialValue: record?.amount.map { String($0) } ?? "")
+        _unit = State(initialValue: record?.unit ?? "ml")
+        _validationMessage = State(initialValue: nil)
     }
     var body: some View {
         NavigationStack { Form {
             DatePicker("時間", selection: $date)
             Picker("類型", selection: $kind) { ForEach(["正餐", "點心", "奶", "飲水"], id: \.self, content: Text.init) }
             TextField("內容", text: $content)
+            HStack {
+                TextField("份量（可留空）", text: $amountText)
+                Picker("單位", selection: $unit) { ForEach(["ml", "g", "份"], id: \.self, content: Text.init) }.labelsHidden()
+            }
             TextField("備註", text: $note)
-        }.navigationTitle(record == nil ? "新增飲食" : "編輯飲食").toolbar { editorToolbar { save() } } }
+        }
+        .navigationTitle(record == nil ? "新增飲食" : "編輯飲食")
+        .toolbar { editorToolbar { save() } }
+        .alert("輸入有誤", isPresented: Binding(
+            get: { validationMessage != nil },
+            set: { if !$0 { validationMessage = nil } }
+        )) { Button("好") { validationMessage = nil } } message: { Text(validationMessage ?? "") }
+        }
     }
     private func save() {
+        let input = amountText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let amount: Double?
+        if input.isEmpty {
+            amount = nil
+        } else if let parsed = Double(input), parsed.isFinite, parsed > 0 {
+            amount = parsed
+        } else {
+            validationMessage = "份量必須是大於 0 的數字。"
+            return
+        }
         let value = record ?? MealRecord(recordedAt: date, kind: kind, content: content)
         value.recordedAt = date; value.kind = kind; value.content = content; value.note = note
+        value.amount = amount; value.unit = amount == nil ? nil : unit
         if onSave(value) { dismiss() }
     }
     @ToolbarContentBuilder private func editorToolbar(save: @escaping () -> Void) -> some ToolbarContent {

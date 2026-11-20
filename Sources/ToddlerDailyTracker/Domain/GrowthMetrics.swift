@@ -85,11 +85,79 @@ enum GrowthMetrics {
 
 enum DailyRecordValidationError: Error, Equatable {
     case invalidSleepRange
+    case invalidMealAmount
+    case sleepAlreadyInProgress
+    case noSleepInProgress
 }
 
 enum DailyRecordValidator {
     static func validateSleep(start: Date, end: Date) throws {
         guard end >= start else { throw DailyRecordValidationError.invalidSleepRange }
+    }
+
+    static func validateMealAmount(_ amount: Double?) throws {
+        guard let amount else { return }
+        guard amount.isFinite, amount > 0 else { throw DailyRecordValidationError.invalidMealAmount }
+    }
+
+    static func validateCanStartSleep(records: [SleepRecord]) throws {
+        guard !records.contains(where: { $0.endedAt == nil }) else {
+            throw DailyRecordValidationError.sleepAlreadyInProgress
+        }
+    }
+}
+
+enum DailyTimelineKind: Equatable {
+    case meal
+    case sleep
+    case diaper
+}
+
+struct DailyTimelineItem: Identifiable {
+    let id = UUID()
+    let kind: DailyTimelineKind
+    let eventDate: Date
+    let title: String
+    let detail: String
+}
+
+enum DailyTimelineBuilder {
+    static func build(
+        meals: [MealRecord],
+        sleeps: [SleepRecord],
+        diapers: [DiaperRecord],
+        day: Date? = nil,
+        calendar: Calendar = .current
+    ) -> [DailyTimelineItem] {
+        let mealItems = meals.map { meal in
+            let amount = meal.amount.map { "・\($0.formatted()) \(meal.unit ?? "")" } ?? ""
+            return DailyTimelineItem(kind: .meal, eventDate: meal.recordedAt, title: "\(meal.kind)・\(meal.content)\(amount)", detail: meal.note)
+        }
+        let sleepItems = sleeps.map { sleep in
+            let title: String
+            if let end = sleep.endedAt {
+                let duration = max(0, end.timeIntervalSince(sleep.startedAt))
+                title = "睡眠・\(duration.formattedDuration)"
+            } else {
+                title = "睡眠中"
+            }
+            return DailyTimelineItem(kind: .sleep, eventDate: sleep.startedAt, title: title, detail: sleep.note)
+        }
+        let diaperItems = diapers.map {
+            DailyTimelineItem(kind: .diaper, eventDate: $0.recordedAt, title: "排便・\($0.condition)", detail: $0.note)
+        }
+        return (mealItems + sleepItems + diaperItems)
+            .filter { item in day.map { calendar.isDate(item.eventDate, inSameDayAs: $0) } ?? true }
+            .sorted { $0.eventDate > $1.eventDate }
+    }
+}
+
+private extension TimeInterval {
+    var formattedDuration: String {
+        let minutes = Int(self / 60)
+        let hours = minutes / 60
+        let remainder = minutes % 60
+        return hours > 0 ? "\(hours) 小時 \(remainder) 分" : "\(remainder) 分"
     }
 }
 

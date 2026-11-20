@@ -35,22 +35,26 @@ final class MealRecord {
     var kind: String
     var content: String
     var note: String
+    var amount: Double?
+    var unit: String?
 
-    init(recordedAt: Date, kind: String, content: String, note: String = "") {
+    init(recordedAt: Date, kind: String, content: String, note: String = "", amount: Double? = nil, unit: String? = nil) {
         self.recordedAt = recordedAt
         self.kind = kind
         self.content = content
         self.note = note
+        self.amount = amount
+        self.unit = unit
     }
 }
 
 @Model
 final class SleepRecord {
     var startedAt: Date
-    var endedAt: Date
+    var endedAt: Date?
     var note: String
 
-    init(startedAt: Date, endedAt: Date, note: String = "") {
+    init(startedAt: Date, endedAt: Date? = nil, note: String = "") {
         self.startedAt = startedAt
         self.endedAt = endedAt
         self.note = note

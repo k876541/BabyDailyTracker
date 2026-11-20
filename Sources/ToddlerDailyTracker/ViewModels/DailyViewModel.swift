@@ -21,10 +21,46 @@ final class DailyViewModel {
         } catch { errorMessage = "無法讀取紀錄：\(error.localizedDescription)" }
     }
 
-    func saveMeal(_ record: MealRecord) -> Bool { save(record) }
+    func saveMeal(_ record: MealRecord) -> Bool {
+        do { try DailyRecordValidator.validateMealAmount(record.amount) }
+        catch { errorMessage = "份量必須是大於 0 的數字。"; return false }
+        return save(record)
+    }
+
+    var timeline: [DailyTimelineItem] {
+        DailyTimelineBuilder.build(meals: meals, sleeps: sleeps, diapers: diapers, day: .now)
+    }
+
+    var activeSleep: SleepRecord? { sleeps.first(where: { $0.endedAt == nil }) }
+
+    func startSleep(at date: Date = .now) -> Bool {
+        do {
+            try DailyRecordValidator.validateCanStartSleep(records: sleeps)
+            return save(SleepRecord(startedAt: date))
+        } catch {
+            errorMessage = "已有一筆進行中的睡眠。"
+            return false
+        }
+    }
+
+    func finishActiveSleep(at date: Date = .now) -> Bool {
+        guard let sleep = activeSleep else {
+            errorMessage = "目前沒有進行中的睡眠。"
+            return false
+        }
+        do {
+            try DailyRecordValidator.validateSleep(start: sleep.startedAt, end: date)
+            sleep.endedAt = date
+            return save(sleep)
+        } catch {
+            errorMessage = "結束時間不可早於開始時間。"
+            return false
+        }
+    }
 
     func saveSleep(_ record: SleepRecord) -> Bool {
-        do { try DailyRecordValidator.validateSleep(start: record.startedAt, end: record.endedAt) }
+        guard let endedAt = record.endedAt else { return save(record) }
+        do { try DailyRecordValidator.validateSleep(start: record.startedAt, end: endedAt) }
         catch { errorMessage = "睡眠結束時間不可早於開始時間。"; return false }
         return save(record)
     }
