@@ -2,6 +2,10 @@ import Foundation
 import SwiftUI
 
 enum TimeInput {
+    static func requiresExactInput(_ date: Date, calendar: Calendar = .current) -> Bool {
+        calendar.component(.minute, from: date).isMultiple(of: 5) == false
+    }
+
     static func roundedToFiveMinutes(_ date: Date, calendar: Calendar = .current) -> Date {
         guard let hour = calendar.dateInterval(of: .hour, for: date)?.start else { return date }
         let minute = calendar.component(.minute, from: date)
@@ -41,6 +45,7 @@ struct RecordDateTimeInput: View {
     init(date: Binding<Date>, validationMessage: Binding<String?>) {
         _date = date
         _validationMessage = validationMessage
+        _usesExactTime = State(initialValue: TimeInput.requiresExactInput(date.wrappedValue))
         _exactText = State(initialValue: Self.timeText(date.wrappedValue))
     }
 

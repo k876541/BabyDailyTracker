@@ -24,6 +24,12 @@ struct TimeInputTests {
         #expect(parsed.map(components) == [2026, 1, 10, 9, 17])
     }
 
+    @Test("Existing non-five-minute time opens in exact mode")
+    func existingPreciseTimeRequiresExactMode() {
+        #expect(TimeInput.requiresExactInput(date(2026, 1, 10, 9, 17), calendar: calendar))
+        #expect(!TimeInput.requiresExactInput(date(2026, 1, 10, 9, 15), calendar: calendar))
+    }
+
     @Test(arguments: ["9:17", "24:00", "12:60", "", "ab:cd"])
     func exactTimeRejectsInvalidInput(_ input: String) {
         #expect(TimeInput.parseExact(input, on: date(2026, 1, 10, 14, 30), calendar: calendar) == nil)
