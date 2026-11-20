@@ -32,10 +32,14 @@ struct TodayView: View {
 
     var body: some View {
         List {
-            Picker("紀錄類型", selection: $selected) {
-                ForEach(DailyKind.allCases) { Text($0.rawValue).tag($0) }
+            Section {
+                welcomeCard
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+                quickActions
+                    .listRowInsets(EdgeInsets(top: 12, leading: 0, bottom: 4, trailing: 0))
+                    .listRowBackground(Color.clear)
             }
-            .pickerStyle(.segmented)
 
             switch selected {
             case .meal: meals
@@ -43,7 +47,10 @@ struct TodayView: View {
             case .diaper: diapers
             }
         }
-        .navigationTitle("Toddler Daily Tracker")
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(Color.primary.opacity(0.04))
+        .navigationTitle("今天")
         .toolbar {
             Button {
                 switch selected {
@@ -61,6 +68,64 @@ struct TodayView: View {
             Text(viewModel.errorMessage ?? "")
         }
         .task { viewModel.load() }
+    }
+
+    private var welcomeCard: some View {
+        HStack(spacing: 16) {
+            ZStack {
+                Circle().fill(.white.opacity(0.82)).frame(width: 58, height: 58)
+                Image(systemName: "figure.child").font(.system(size: 28, weight: .semibold)).foregroundStyle(BabyTheme.primary)
+            }
+            VStack(alignment: .leading, spacing: 5) {
+                Text(Date.now.formatted(.dateTime.weekday(.wide).month().day()))
+                    .font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                Text("今天也一起照顧寶寶")
+                    .font(.title3.bold()).foregroundStyle(.primary)
+                Text(todaySummary).font(.subheadline).foregroundStyle(.secondary)
+            }
+            Spacer()
+        }
+        .padding(18)
+        .background(
+            LinearGradient(colors: [BabyTheme.peach, BabyTheme.lavender.opacity(0.65)], startPoint: .topLeading, endPoint: .bottomTrailing),
+            in: RoundedRectangle(cornerRadius: 24, style: .continuous)
+        )
+    }
+
+    private var todaySummary: String {
+        let calendar = Calendar.current
+        let meals = viewModel.meals.filter { calendar.isDateInToday($0.recordedAt) }.count
+        let sleeps = viewModel.sleeps.filter { calendar.isDateInToday($0.startedAt) }.count
+        let diapers = viewModel.diapers.filter { calendar.isDateInToday($0.recordedAt) }.count
+        return "飲食 \(meals)・睡眠 \(sleeps)・排便 \(diapers)"
+    }
+
+    private var quickActions: some View {
+        HStack(spacing: 10) {
+            quickAction(.meal, icon: "fork.knife", color: BabyTheme.peach)
+            quickAction(.sleep, icon: "moon.stars.fill", color: BabyTheme.lavender)
+            quickAction(.diaper, icon: "drop.fill", color: BabyTheme.mint)
+        }
+    }
+
+    private func quickAction(_ kind: DailyKind, icon: String, color: Color) -> some View {
+        Button {
+            selected = kind
+            switch kind {
+            case .meal: editor = .meal(nil)
+            case .sleep: editor = .sleep(nil)
+            case .diaper: editor = .diaper(nil)
+            }
+        } label: {
+            VStack(spacing: 9) {
+                Image(systemName: icon).font(.title3).foregroundStyle(selected == kind ? .white : .primary)
+                Text(kind.rawValue).font(.caption.weight(.semibold)).foregroundStyle(selected == kind ? .white : .primary)
+            }
+            .frame(maxWidth: .infinity).padding(.vertical, 14)
+            .background(selected == kind ? BabyTheme.primary : color, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("新增\(kind.rawValue)紀錄")
     }
 
     private var meals: some View {
@@ -125,11 +190,17 @@ private struct RecordRow: View {
     let date: Date
     let note: String
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title).foregroundStyle(.primary)
+        HStack(spacing: 12) {
+            Circle().fill(BabyTheme.primary.opacity(0.13)).frame(width: 10, height: 10)
+            VStack(alignment: .leading, spacing: 4) {
+            Text(title).font(.body.weight(.medium)).foregroundStyle(.primary)
             Text(date.formatted(date: .abbreviated, time: .shortened)).font(.caption).foregroundStyle(.secondary)
             if !note.isEmpty { Text(note).font(.caption).foregroundStyle(.secondary) }
+            }
+            Spacer()
+            Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
         }
+        .padding(.vertical, 4)
     }
 }
 
