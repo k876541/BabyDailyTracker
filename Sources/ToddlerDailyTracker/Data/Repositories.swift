@@ -33,20 +33,35 @@ final class SwiftDataGrowthRepository: GrowthRepository {
     }
 }
 
+enum BabyProfileRepositoryError: Error, Equatable {
+    case profileAlreadyExists
+}
+
 @MainActor
-final class BabyProfileRepository {
+protocol BabyProfileRepository {
+    func fetchProfile() throws -> BabyProfile?
+    func createProfile(name: String, birthday: Date) throws -> BabyProfile
+    func updateProfile(_ profile: BabyProfile) throws
+}
+
+@MainActor
+final class SwiftDataBabyProfileRepository: BabyProfileRepository {
     private let context: ModelContext
     init(context: ModelContext) { self.context = context }
 
-    func fetchOrCreate() throws -> BabyProfile {
-        if let profile = try context.fetch(FetchDescriptor<BabyProfile>()).first { return profile }
-        let profile = BabyProfile()
+    func fetchProfile() throws -> BabyProfile? {
+        try context.fetch(FetchDescriptor<BabyProfile>()).first
+    }
+
+    func createProfile(name: String, birthday: Date) throws -> BabyProfile {
+        guard try fetchProfile() == nil else { throw BabyProfileRepositoryError.profileAlreadyExists }
+        let profile = BabyProfile(name: name, birthday: birthday)
         context.insert(profile)
         try context.save()
         return profile
     }
 
-    func save(_ profile: BabyProfile) throws { try context.save() }
+    func updateProfile(_ profile: BabyProfile) throws { try context.save() }
 }
 
 @MainActor

@@ -10,7 +10,7 @@ struct GrowthScreen: View {
     init(context: ModelContext) {
         _viewModel = State(initialValue: GrowthViewModel(
             repository: SwiftDataGrowthRepository(context: context),
-            profileRepository: BabyProfileRepository(context: context)
+            profileRepository: SwiftDataBabyProfileRepository(context: context)
         ))
     }
 

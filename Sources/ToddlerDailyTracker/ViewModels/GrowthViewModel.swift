@@ -5,13 +5,13 @@ import Observation
 @Observable
 final class GrowthViewModel {
     private let repository: any GrowthRepository
-    private let profileRepository: BabyProfileRepository
+    private let profileRepository: any BabyProfileRepository
     var records: [GrowthRecord] = []
     var profile: BabyProfile?
     var errorMessage: String?
     var selectedMetric: GrowthMetric = .height
 
-    init(repository: any GrowthRepository, profileRepository: BabyProfileRepository) {
+    init(repository: any GrowthRepository, profileRepository: any BabyProfileRepository) {
         self.repository = repository
         self.profileRepository = profileRepository
     }
@@ -19,7 +19,7 @@ final class GrowthViewModel {
     func load() {
         do {
             records = try repository.fetch()
-            profile = try profileRepository.fetchOrCreate()
+            profile = try profileRepository.fetchProfile()
         }
         catch { errorMessage = "無法讀取成長紀錄：\(error.localizedDescription)" }
     }
@@ -28,7 +28,7 @@ final class GrowthViewModel {
         guard let profile else { return }
         profile.name = name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "寶寶" : name
         profile.birthday = birthday
-        do { try profileRepository.save(profile) }
+        do { try BabyProfileValidator.validate(name: profile.name, birthday: birthday); try profileRepository.updateProfile(profile) }
         catch { errorMessage = "無法儲存寶寶資料：\(error.localizedDescription)" }
     }
 
@@ -63,5 +63,43 @@ final class GrowthViewModel {
         GrowthMetrics.summary(for: metric, samples: samples)
     }
     var trend: [GrowthPoint] { GrowthMetrics.trend(for: selectedMetric, samples: samples) }
+}
+
+enum AppLaunchState: Equatable {
+    case loading
+    case needsBabyProfile
+    case ready
+}
+
+@MainActor
+@Observable
+final class AppLaunchViewModel {
+    private let repository: any BabyProfileRepository
+    var state: AppLaunchState = .loading
+    var errorMessage: String?
+
+    init(repository: any BabyProfileRepository) { self.repository = repository }
+
+    func load() {
+        do { state = try repository.fetchProfile() == nil ? .needsBabyProfile : .ready }
+        catch { errorMessage = "無法讀取寶寶資料：\(error.localizedDescription)"; state = .needsBabyProfile }
+    }
+
+    func save(name: String, birthday: Date) -> Bool {
+        do {
+            let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            try BabyProfileValidator.validate(name: normalizedName, birthday: birthday)
+            _ = try repository.createProfile(name: normalizedName, birthday: birthday)
+            state = .ready
+            return true
+        } catch BabyProfileValidationError.emptyName {
+            errorMessage = "請輸入寶寶姓名。"
+        } catch BabyProfileValidationError.futureBirthday {
+            errorMessage = "生日不可晚於今天。"
+        } catch {
+            errorMessage = "無法儲存寶寶資料：\(error.localizedDescription)"
+        }
+        return false
+    }
 }
 

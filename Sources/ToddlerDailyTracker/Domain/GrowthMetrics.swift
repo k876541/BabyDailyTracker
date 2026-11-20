@@ -93,3 +93,17 @@ enum DailyRecordValidator {
     }
 }
 
+enum BabyProfileValidationError: Error, Equatable {
+    case emptyName
+    case futureBirthday
+}
+
+enum BabyProfileValidator {
+    static func validate(name: String, birthday: Date, now: Date = .now) throws {
+        guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw BabyProfileValidationError.emptyName
+        }
+        guard birthday <= now else { throw BabyProfileValidationError.futureBirthday }
+    }
+}
+
