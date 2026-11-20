@@ -6,6 +6,9 @@ BabyDailyTracker is a local-first SwiftUI app for recording a toddler's meals, s
 
 - Baby profile with name, birthday, age, latest height, and latest weight
 - Meal, sleep, and diaper record creation, editing, deletion, and history
+- Date-based history with daily and rolling seven-day summaries
+- Cross-midnight sleep duration allocated to the calendar days it overlaps
+- Five-minute quick time selection with optional exact `HH:mm` input
 - Height-only, weight-only, or combined growth measurements
 - Backdated measurements sorted by their actual measurement time
 - Height and weight trends built with Swift Charts
@@ -41,4 +44,5 @@ swift test
 - WHO growth percentiles
 - Medical advice
 - Cloud sync or user accounts
+- Medication reminders and notification actions are planned for a later phase
 

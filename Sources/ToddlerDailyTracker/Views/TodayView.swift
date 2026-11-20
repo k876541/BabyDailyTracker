@@ -181,10 +181,10 @@ struct TodayView: View {
     }
 
     private func edit(_ item: DailyTimelineItem) {
-        switch item.kind {
-        case .meal: editor = viewModel.meals.first { $0.recordedAt == item.eventDate }.map(DailyEditor.meal)
-        case .sleep: editor = viewModel.sleeps.first { $0.startedAt == item.eventDate }.map(DailyEditor.sleep)
-        case .diaper: editor = viewModel.diapers.first { $0.recordedAt == item.eventDate }.map(DailyEditor.diaper)
+        switch item.id {
+        case .meal(let id): editor = viewModel.meals.first { $0.persistentModelID == id }.map(DailyEditor.meal)
+        case .sleep(let id): editor = viewModel.sleeps.first { $0.persistentModelID == id }.map(DailyEditor.sleep)
+        case .diaper(let id): editor = viewModel.diapers.first { $0.persistentModelID == id }.map(DailyEditor.diaper)
         }
     }
 
@@ -192,13 +192,13 @@ struct TodayView: View {
         let items = viewModel.timeline
         for offset in offsets {
             let item = items[offset]
-            switch item.kind {
-            case .meal:
-                if let record = viewModel.meals.first(where: { $0.recordedAt == item.eventDate }) { viewModel.delete(record) }
-            case .sleep:
-                if let record = viewModel.sleeps.first(where: { $0.startedAt == item.eventDate }) { viewModel.delete(record) }
-            case .diaper:
-                if let record = viewModel.diapers.first(where: { $0.recordedAt == item.eventDate }) { viewModel.delete(record) }
+            switch item.id {
+            case .meal(let id):
+                if let record = viewModel.meals.first(where: { $0.persistentModelID == id }) { viewModel.delete(record) }
+            case .sleep(let id):
+                if let record = viewModel.sleeps.first(where: { $0.persistentModelID == id }) { viewModel.delete(record) }
+            case .diaper(let id):
+                if let record = viewModel.diapers.first(where: { $0.persistentModelID == id }) { viewModel.delete(record) }
             }
         }
     }

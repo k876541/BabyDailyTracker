@@ -42,6 +42,8 @@ private struct MainTabView: View {
         TabView {
             NavigationStack { TodayView(context: context) }
                 .tabItem { Label("日常", systemImage: "list.bullet.clipboard") }
+            NavigationStack { HistoryView(context: context) }
+                .tabItem { Label("歷史", systemImage: "calendar") }
             NavigationStack { GrowthScreen(context: context) }
                 .tabItem { Label("成長", systemImage: "chart.xyaxis.line") }
         }
