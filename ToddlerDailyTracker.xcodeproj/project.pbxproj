@@ -16,6 +16,8 @@
 		A10000000000000000000007 /* Views/ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000007 /* Views/ContentView.swift */; };
 		A10000000000000000000008 /* Views/GrowthScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000008 /* Views/GrowthScreen.swift */; };
 		A10000000000000000000009 /* Views/TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000009 /* Views/TodayView.swift */; };
+		A10000000000000000000011 /* Features/DailyRecordEditor/TimeInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000011 /* Features/DailyRecordEditor/TimeInput.swift */; };
+		A10000000000000000000012 /* Features/DailyRecordEditor/DailyRecordEditors.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000012 /* Features/DailyRecordEditor/DailyRecordEditors.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +31,8 @@
 		A20000000000000000000008 /* Views/GrowthScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/GrowthScreen.swift; sourceTree = "<group>"; };
 		A20000000000000000000009 /* Views/TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/TodayView.swift; sourceTree = "<group>"; };
 		A20000000000000000000010 /* ToddlerDailyTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ToddlerDailyTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A20000000000000000000011 /* Features/DailyRecordEditor/TimeInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/DailyRecordEditor/TimeInput.swift; sourceTree = "<group>"; };
+		A20000000000000000000012 /* Features/DailyRecordEditor/DailyRecordEditors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/DailyRecordEditor/DailyRecordEditors.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -52,6 +56,8 @@
 				A20000000000000000000007 /* Views/ContentView.swift */,
 				A20000000000000000000008 /* Views/GrowthScreen.swift */,
 				A20000000000000000000009 /* Views/TodayView.swift */,
+				A20000000000000000000011 /* Features/DailyRecordEditor/TimeInput.swift */,
+				A20000000000000000000012 /* Features/DailyRecordEditor/DailyRecordEditors.swift */,
 			);
 			path = Sources/ToddlerDailyTracker;
 			sourceTree = SOURCE_ROOT;
@@ -140,6 +146,8 @@
 				A10000000000000000000007 /* Views/ContentView.swift in Sources */,
 				A10000000000000000000008 /* Views/GrowthScreen.swift in Sources */,
 				A10000000000000000000009 /* Views/TodayView.swift in Sources */,
+				A10000000000000000000011 /* Features/DailyRecordEditor/TimeInput.swift in Sources */,
+				A10000000000000000000012 /* Features/DailyRecordEditor/DailyRecordEditors.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
