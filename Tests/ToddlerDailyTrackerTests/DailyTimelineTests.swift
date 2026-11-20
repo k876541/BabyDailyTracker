@@ -58,4 +58,17 @@ struct DailyTimelineTests {
             try DailyRecordValidator.validateSleep(start: start, end: Date(timeIntervalSince1970: 100))
         }
     }
+
+    @Test("Timeline identity remains stable when records share a timestamp")
+    func timelineIdentityUsesSourceRecord() {
+        let timestamp = Date(timeIntervalSince1970: 200)
+        let first = MealRecord(recordedAt: timestamp, kind: "奶", content: "母奶")
+        let second = MealRecord(recordedAt: timestamp, kind: "奶", content: "配方奶")
+
+        let firstBuild = DailyTimelineBuilder.build(meals: [first, second], sleeps: [], diapers: [])
+        let secondBuild = DailyTimelineBuilder.build(meals: [first, second], sleeps: [], diapers: [])
+
+        #expect(Set(firstBuild.map(\.id)).count == 2)
+        #expect(Set(firstBuild.map(\.id)) == Set(secondBuild.map(\.id)))
+    }
 }

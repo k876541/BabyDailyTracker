@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 
 enum GrowthValidationError: Error, Equatable {
     case missingMeasurement
@@ -113,8 +114,14 @@ enum DailyTimelineKind: Equatable {
     case diaper
 }
 
+enum DailyTimelineSource: Hashable {
+    case meal(PersistentIdentifier)
+    case sleep(PersistentIdentifier)
+    case diaper(PersistentIdentifier)
+}
+
 struct DailyTimelineItem: Identifiable {
-    let id = UUID()
+    let id: DailyTimelineSource
     let kind: DailyTimelineKind
     let eventDate: Date
     let title: String
@@ -131,7 +138,7 @@ enum DailyTimelineBuilder {
     ) -> [DailyTimelineItem] {
         let mealItems = meals.map { meal in
             let amount = meal.amount.map { "・\($0.formatted()) \(meal.unit ?? "")" } ?? ""
-            return DailyTimelineItem(kind: .meal, eventDate: meal.recordedAt, title: "\(meal.kind)・\(meal.content)\(amount)", detail: meal.note)
+            return DailyTimelineItem(id: .meal(meal.persistentModelID), kind: .meal, eventDate: meal.recordedAt, title: "\(meal.kind)・\(meal.content)\(amount)", detail: meal.note)
         }
         let sleepItems = sleeps.map { sleep in
             let title: String
@@ -141,10 +148,10 @@ enum DailyTimelineBuilder {
             } else {
                 title = "睡眠中"
             }
-            return DailyTimelineItem(kind: .sleep, eventDate: sleep.startedAt, title: title, detail: sleep.note)
+            return DailyTimelineItem(id: .sleep(sleep.persistentModelID), kind: .sleep, eventDate: sleep.startedAt, title: title, detail: sleep.note)
         }
         let diaperItems = diapers.map {
-            DailyTimelineItem(kind: .diaper, eventDate: $0.recordedAt, title: "排便・\($0.condition)", detail: $0.note)
+            DailyTimelineItem(id: .diaper($0.persistentModelID), kind: .diaper, eventDate: $0.recordedAt, title: "排便・\($0.condition)", detail: $0.note)
         }
         return (mealItems + sleepItems + diaperItems)
             .filter { item in day.map { calendar.isDate(item.eventDate, inSameDayAs: $0) } ?? true }
