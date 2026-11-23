@@ -1,5 +1,7 @@
 # BabyDailyTracker
 
+[![CI](https://github.com/k876541/BabyDailyTracker/actions/workflows/ci.yml/badge.svg)](https://github.com/k876541/BabyDailyTracker/actions/workflows/ci.yml)
+
 BabyDailyTracker is a local-first SwiftUI app for recording a toddler's meals, sleep, diaper activity, and growth history.
 
 ## MVP features
@@ -38,6 +40,10 @@ Open `ToddlerDailyTracker.xcodeproj`, select an iPhone simulator, and run the `T
 ```sh
 swift test
 ```
+
+## Continuous integration
+
+GitHub Actions runs the complete unit test suite and builds the iOS Simulator app for every push and pull request. The CI build disables code signing, so it does not require an Apple Developer membership or signing credentials.
 
 ## MVP exclusions
 

@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Test and build
+    runs-on: xcode-27
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Check formatting
+        run: git diff --check
+
+      - name: Run unit tests
+        run: swift test --disable-sandbox
+
+      - name: Build iOS Simulator app
+        run: >-
+          xcodebuild -quiet
+          -project ToddlerDailyTracker.xcodeproj
+          -scheme ToddlerDailyTracker
+          -destination 'generic/platform=iOS Simulator'
+          -derivedDataPath "$RUNNER_TEMP/BabyDailyTrackerDerivedData"
+          CODE_SIGNING_ALLOWED=NO
+          build
