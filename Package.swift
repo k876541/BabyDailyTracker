@@ -10,7 +10,8 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "ToddlerDailyTracker",
-            path: "Sources/ToddlerDailyTracker"
+            path: "Sources/ToddlerDailyTracker",
+            exclude: ["Features/MedicationReminder/DESIGN.md"]
         ),
         .testTarget(
             name: "ToddlerDailyTrackerTests",
