@@ -115,6 +115,22 @@ struct MedicationScheduleTests {
         #expect(dates == [date(2026, 11, 23, 9), date(2026, 11, 23, 13), date(2026, 11, 23, 17)])
     }
 
+    @Test("Time mutations remain valid after reordering and deletion")
+    func timeMutationsUseStableIdentity() {
+        var value = draft(times: [time(9), time(13), time(17)])
+        let selectedID = value.times[0].id
+
+        value.updateTime(id: selectedID, hour: 18, minute: 0)
+
+        #expect(value.times.map(\.hour) == [13, 17, 18])
+        #expect(value.times.last?.id == selectedID)
+
+        value.removeTime(id: selectedID)
+
+        #expect(value.times.map(\.hour) == [13, 17])
+        #expect(value.times.allSatisfy { $0.id != selectedID })
+    }
+
     private var calendar: Calendar {
         var value = Calendar(identifier: .gregorian)
         value.timeZone = TimeZone(secondsFromGMT: 0)!

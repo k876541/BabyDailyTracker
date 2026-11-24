@@ -185,16 +185,16 @@ private struct MedicationReminderEditor: View {
                 }
 
                 Section("每天固定時間") {
-                    ForEach(viewModel.draft.times.indices, id: \.self) { index in
+                    ForEach(viewModel.draft.times) { time in
                         HStack {
                             DatePicker(
-                                "提醒 \(index + 1)",
-                                selection: timeBinding(at: index),
+                                "提醒 \(timeNumber(for: time.id))",
+                                selection: timeBinding(for: time.id),
                                 displayedComponents: .hourAndMinute
                             )
                             if viewModel.draft.times.count > 1 {
                                 Button(role: .destructive) {
-                                    viewModel.draft.times.remove(at: index)
+                                    viewModel.draft.removeTime(id: time.id)
                                 } label: {
                                     Image(systemName: "trash")
                                 }
@@ -242,10 +242,12 @@ private struct MedicationReminderEditor: View {
         }
     }
 
-    private func timeBinding(at index: Int) -> Binding<Date> {
+    private func timeBinding(for id: UUID) -> Binding<Date> {
         Binding(
             get: {
-                let time = viewModel.draft.times[index]
+                guard let time = viewModel.draft.times.first(where: { $0.id == id }) else {
+                    return viewModel.draft.startDate
+                }
                 return Calendar.current.date(
                     bySettingHour: time.hour,
                     minute: time.minute,
@@ -256,12 +258,13 @@ private struct MedicationReminderEditor: View {
             set: { date in
                 let components = Calendar.current.dateComponents([.hour, .minute], from: date)
                 guard let hour = components.hour, let minute = components.minute else { return }
-                viewModel.draft.times[index] = MedicationReminderTime(
-                    hour: hour,
-                    minute: (minute / 5) * 5
-                )
-                viewModel.draft.times.sort { ($0.hour, $0.minute) < ($1.hour, $1.minute) }
+                viewModel.draft.updateTime(id: id, hour: hour, minute: (minute / 5) * 5)
             }
         )
+    }
+
+    private func timeNumber(for id: UUID) -> Int {
+        guard let index = viewModel.draft.times.firstIndex(where: { $0.id == id }) else { return 1 }
+        return index + 1
     }
 }

@@ -1,8 +1,24 @@
 import Foundation
 
-struct MedicationReminderTime: Hashable, Codable, Sendable {
+struct MedicationReminderTime: Identifiable, Hashable, Codable, Sendable {
+    let id: UUID
     let hour: Int
     let minute: Int
+
+    init(id: UUID = UUID(), hour: Int, minute: Int) {
+        self.id = id
+        self.hour = hour
+        self.minute = minute
+    }
+
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.hour == rhs.hour && lhs.minute == rhs.minute
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(hour)
+        hasher.combine(minute)
+    }
 }
 
 struct MedicationReminderDraft: Equatable, Sendable {
@@ -11,6 +27,16 @@ struct MedicationReminderDraft: Equatable, Sendable {
     var times: [MedicationReminderTime]
     var minimumIntervalMinutes: Int
     var snoozeMinutes: Int
+
+    mutating func updateTime(id: UUID, hour: Int, minute: Int) {
+        guard let index = times.firstIndex(where: { $0.id == id }) else { return }
+        times[index] = MedicationReminderTime(id: id, hour: hour, minute: minute)
+        times.sort { ($0.hour, $0.minute) < ($1.hour, $1.minute) }
+    }
+
+    mutating func removeTime(id: UUID) {
+        times.removeAll { $0.id == id }
+    }
 }
 
 enum MedicationScheduleValidationError: Error, Equatable {
