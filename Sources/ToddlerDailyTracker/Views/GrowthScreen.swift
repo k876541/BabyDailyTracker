@@ -10,7 +10,7 @@ struct GrowthScreen: View {
     init(context: ModelContext) {
         _viewModel = State(initialValue: GrowthViewModel(
             repository: SwiftDataGrowthRepository(context: context),
-            profileRepository: BabyProfileRepository(context: context)
+            profileRepository: SwiftDataBabyProfileRepository(context: context)
         ))
     }
 
@@ -21,7 +21,10 @@ struct GrowthScreen: View {
             chartSection
             historySection
         }
-        .navigationTitle("寶寶成長紀錄")
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(Color.primary.opacity(0.04))
+        .navigationTitle("成長")
         .toolbar {
             Button { editor = GrowthEditorState() } label: { Image(systemName: "plus") }
         }
@@ -48,23 +51,30 @@ struct GrowthScreen: View {
     }
 
     private var profileSection: some View {
-        Section("寶寶個人資料") {
+        Section {
             Button { showingProfileEditor = true } label: {
             HStack {
-                Image(systemName: "figure.child.circle.fill")
-                    .font(.system(size: 44)).foregroundStyle(.orange)
+                ZStack {
+                    Circle().fill(.white.opacity(0.8)).frame(width: 58, height: 58)
+                    Image(systemName: "figure.child").font(.system(size: 28, weight: .semibold)).foregroundStyle(BabyTheme.primary)
+                }
                 VStack(alignment: .leading) {
-                    Text(viewModel.profile?.name ?? "寶寶").font(.headline).foregroundStyle(.primary)
+                    Text(viewModel.profile?.name ?? "寶寶").font(.title3.bold()).foregroundStyle(.primary)
                     Text(profileSubtitle)
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
                 Image(systemName: "chevron.right").foregroundStyle(.tertiary)
             }
+            .padding(16)
+            .background(
+                LinearGradient(colors: [BabyTheme.sky, BabyTheme.mint.opacity(0.72)], startPoint: .topLeading, endPoint: .bottomTrailing),
+                in: RoundedRectangle(cornerRadius: 24, style: .continuous)
+            )
             }
-            LabeledContent("最新身高", value: summaryText(.height))
-            LabeledContent("最新體重", value: summaryText(.weight))
         }
+        .listRowInsets(EdgeInsets())
+        .listRowBackground(Color.clear)
     }
 
     private var profileSubtitle: String {
@@ -78,21 +88,25 @@ struct GrowthScreen: View {
 
     private var summarySection: some View {
         Section("最新測量") {
-            ForEach(GrowthMetric.allCases) { metric in
-                if let summary = viewModel.summary(for: metric) {
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(metric.rawValue).font(.caption).foregroundStyle(.secondary)
-                            Text(summary.latest.formatted(.number.precision(.fractionLength(0...2))) + " " + metric.unit)
-                                .font(.title3.bold())
-                        }
-                        Spacer()
-                        Text(changeText(summary.change, unit: metric.unit))
-                            .foregroundStyle(changeColor(summary.change))
-                    }
-                }
+            HStack(spacing: 12) {
+                metricCard(.height, icon: "ruler.fill", color: BabyTheme.peach)
+                metricCard(.weight, icon: "scalemass.fill", color: BabyTheme.lavender)
             }
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
         }
+    }
+
+    private func metricCard(_ metric: GrowthMetric, icon: String, color: Color) -> some View {
+        let summary = viewModel.summary(for: metric)
+        return VStack(alignment: .leading, spacing: 9) {
+            Image(systemName: icon).foregroundStyle(BabyTheme.primary)
+            Text(metric.rawValue).font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+            Text(summaryText(metric)).font(.title3.bold()).lineLimit(1).minimumScaleFactor(0.75)
+            Text(changeText(summary?.change, unit: metric.unit)).font(.caption).foregroundStyle(changeColor(summary?.change))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading).padding(15)
+        .background(color, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private var chartSection: some View {
@@ -109,6 +123,7 @@ struct GrowthScreen: View {
                     LineMark(x: .value("日期", point.date), y: .value(viewModel.selectedMetric.rawValue, point.value))
                     PointMark(x: .value("日期", point.date), y: .value(viewModel.selectedMetric.rawValue, point.value))
                 }
+                .foregroundStyle(BabyTheme.primary)
                 .frame(height: 210)
                 .chartYAxisLabel(viewModel.selectedMetric.unit)
             }
