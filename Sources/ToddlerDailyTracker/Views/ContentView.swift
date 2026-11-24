@@ -46,6 +46,8 @@ private struct MainTabView: View {
                 .tabItem { Label("歷史", systemImage: "calendar") }
             NavigationStack { GrowthScreen(context: context) }
                 .tabItem { Label("成長", systemImage: "chart.xyaxis.line") }
+            NavigationStack { MedicationReminderView(context: context) }
+                .tabItem { Label("提醒", systemImage: "bell.badge") }
         }
         .tint(BabyTheme.primary)
     }

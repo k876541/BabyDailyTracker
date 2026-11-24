@@ -21,6 +21,13 @@
 		A10000000000000000000013 /* Features/History/HistoryCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000013 /* Features/History/HistoryCalculator.swift */; };
 		A10000000000000000000014 /* Features/History/HistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000014 /* Features/History/HistoryViewModel.swift */; };
 		A10000000000000000000015 /* Features/History/HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000015 /* Features/History/HistoryView.swift */; };
+		A10000000000000000000016 /* Features/MedicationReminder/MedicationSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000016 /* Features/MedicationReminder/MedicationSchedule.swift */; };
+		A10000000000000000000017 /* Features/MedicationReminder/MedicationReminderRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000017 /* Features/MedicationReminder/MedicationReminderRepository.swift */; };
+		A10000000000000000000018 /* Features/MedicationReminder/MedicationNotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000018 /* Features/MedicationReminder/MedicationNotificationScheduler.swift */; };
+		A10000000000000000000019 /* Features/MedicationReminder/MedicationReminderCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000019 /* Features/MedicationReminder/MedicationReminderCoordinator.swift */; };
+		A10000000000000000000020 /* Features/MedicationReminder/MedicationReminderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000020 /* Features/MedicationReminder/MedicationReminderViewModel.swift */; };
+		A10000000000000000000021 /* Features/MedicationReminder/MedicationReminderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000021 /* Features/MedicationReminder/MedicationReminderView.swift */; };
+		A10000000000000000000022 /* Features/MedicationReminder/MedicationNotificationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000022 /* Features/MedicationReminder/MedicationNotificationDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +46,13 @@
 		A20000000000000000000013 /* Features/History/HistoryCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/History/HistoryCalculator.swift; sourceTree = "<group>"; };
 		A20000000000000000000014 /* Features/History/HistoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/History/HistoryViewModel.swift; sourceTree = "<group>"; };
 		A20000000000000000000015 /* Features/History/HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/History/HistoryView.swift; sourceTree = "<group>"; };
+		A20000000000000000000016 /* Features/MedicationReminder/MedicationSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/MedicationReminder/MedicationSchedule.swift; sourceTree = "<group>"; };
+		A20000000000000000000017 /* Features/MedicationReminder/MedicationReminderRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/MedicationReminder/MedicationReminderRepository.swift; sourceTree = "<group>"; };
+		A20000000000000000000018 /* Features/MedicationReminder/MedicationNotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/MedicationReminder/MedicationNotificationScheduler.swift; sourceTree = "<group>"; };
+		A20000000000000000000019 /* Features/MedicationReminder/MedicationReminderCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/MedicationReminder/MedicationReminderCoordinator.swift; sourceTree = "<group>"; };
+		A20000000000000000000020 /* Features/MedicationReminder/MedicationReminderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/MedicationReminder/MedicationReminderViewModel.swift; sourceTree = "<group>"; };
+		A20000000000000000000021 /* Features/MedicationReminder/MedicationReminderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/MedicationReminder/MedicationReminderView.swift; sourceTree = "<group>"; };
+		A20000000000000000000022 /* Features/MedicationReminder/MedicationNotificationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/MedicationReminder/MedicationNotificationDelegate.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -67,6 +81,13 @@
 				A20000000000000000000013 /* Features/History/HistoryCalculator.swift */,
 				A20000000000000000000014 /* Features/History/HistoryViewModel.swift */,
 				A20000000000000000000015 /* Features/History/HistoryView.swift */,
+				A20000000000000000000016 /* Features/MedicationReminder/MedicationSchedule.swift */,
+				A20000000000000000000017 /* Features/MedicationReminder/MedicationReminderRepository.swift */,
+				A20000000000000000000018 /* Features/MedicationReminder/MedicationNotificationScheduler.swift */,
+				A20000000000000000000019 /* Features/MedicationReminder/MedicationReminderCoordinator.swift */,
+				A20000000000000000000020 /* Features/MedicationReminder/MedicationReminderViewModel.swift */,
+				A20000000000000000000021 /* Features/MedicationReminder/MedicationReminderView.swift */,
+				A20000000000000000000022 /* Features/MedicationReminder/MedicationNotificationDelegate.swift */,
 			);
 			path = Sources/ToddlerDailyTracker;
 			sourceTree = SOURCE_ROOT;
@@ -160,6 +181,13 @@
 				A10000000000000000000013 /* Features/History/HistoryCalculator.swift in Sources */,
 				A10000000000000000000014 /* Features/History/HistoryViewModel.swift in Sources */,
 				A10000000000000000000015 /* Features/History/HistoryView.swift in Sources */,
+				A10000000000000000000016 /* Features/MedicationReminder/MedicationSchedule.swift in Sources */,
+				A10000000000000000000017 /* Features/MedicationReminder/MedicationReminderRepository.swift in Sources */,
+				A10000000000000000000018 /* Features/MedicationReminder/MedicationNotificationScheduler.swift in Sources */,
+				A10000000000000000000019 /* Features/MedicationReminder/MedicationReminderCoordinator.swift in Sources */,
+				A10000000000000000000020 /* Features/MedicationReminder/MedicationReminderViewModel.swift in Sources */,
+				A10000000000000000000021 /* Features/MedicationReminder/MedicationReminderView.swift in Sources */,
+				A10000000000000000000022 /* Features/MedicationReminder/MedicationNotificationDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
