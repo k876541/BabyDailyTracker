@@ -6,7 +6,18 @@ enum MedicationReminderCoordinatorError: Error, Equatable {
 }
 
 @MainActor
-final class MedicationReminderCoordinator {
+protocol MedicationReminderCoordinating: AnyObject {
+    func create(_ draft: MedicationReminderDraft) async throws
+    func update(planID: UUID, draft: MedicationReminderDraft) async throws
+    func complete(occurrenceID: UUID, at date: Date) async throws
+    func snooze(occurrenceID: UUID, now: Date) async throws
+    func end(planID: UUID, at date: Date) async throws
+    func delete(planID: UUID) async throws
+    func reconcile(now: Date) async throws
+}
+
+@MainActor
+final class MedicationReminderCoordinator: MedicationReminderCoordinating {
     private let repository: MedicationReminderRepository
     private let scheduler: MedicationNotificationScheduling
     private let calendar: Calendar
