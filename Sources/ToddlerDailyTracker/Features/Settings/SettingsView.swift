@@ -3,6 +3,8 @@ import SwiftUI
 
 struct SettingsView: View {
     @State private var viewModel: SettingsViewModel
+    @State private var showsFirstConfirmation = false
+    @State private var showsPermanentConfirmation = false
     let onReset: () -> Void
 
     init(context: ModelContext, onReset: @escaping () -> Void) {
@@ -18,6 +20,7 @@ struct SettingsView: View {
             Section {
                 Button("移除寶寶資料", role: .destructive) {
                     viewModel.requestReset()
+                    showsFirstConfirmation = true
                 }
                 .disabled(viewModel.isResetting)
 
@@ -37,15 +40,18 @@ struct SettingsView: View {
         .navigationTitle("設定")
         .confirmationDialog(
             "要移除寶寶資料嗎？",
-            isPresented: stageBinding(.first),
+            isPresented: $showsFirstConfirmation,
             titleVisibility: .visible
         ) {
-            Button("繼續") { viewModel.confirmFirstReset() }
+            Button("繼續") {
+                viewModel.confirmFirstReset()
+                showsPermanentConfirmation = true
+            }
             Button("取消", role: .cancel) { viewModel.cancelReset() }
         } message: {
             Text("下一步會再次確認；目前尚未刪除任何資料。")
         }
-        .alert("永久刪除所有資料？", isPresented: stageBinding(.permanent)) {
+        .alert("永久刪除所有資料？", isPresented: $showsPermanentConfirmation) {
             Button("取消", role: .cancel) { viewModel.cancelReset() }
             Button("永久刪除", role: .destructive) {
                 Task {
@@ -67,10 +73,4 @@ struct SettingsView: View {
         }
     }
 
-    private func stageBinding(_ stage: SettingsConfirmationStage) -> Binding<Bool> {
-        Binding(
-            get: { viewModel.confirmationStage == stage },
-            set: { if !$0 { viewModel.cancelReset() } }
-        )
-    }
 }

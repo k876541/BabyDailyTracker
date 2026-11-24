@@ -40,6 +40,24 @@ struct AppDataResetRepositoryTests {
         #expect(try context.fetch(FetchDescriptor<MedicationDoseOccurrence>()).isEmpty)
     }
 
+    @Test("Failed save rolls back pending deletions")
+    func failedSaveRollsBackPendingDeletions() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        context.insert(BabyProfile(name: "小安", birthday: .now))
+        try context.save()
+        let repository = SwiftDataAppDataResetRepository(
+            context: context,
+            save: { _ in throw ResetRepositoryTestError.failed }
+        )
+
+        #expect(throws: ResetRepositoryTestError.failed) {
+            try repository.reset()
+        }
+
+        #expect(try context.fetch(FetchDescriptor<BabyProfile>()).count == 1)
+    }
+
     private func makeContainer() throws -> ModelContainer {
         try ModelContainer(
             for: BabyProfile.self,
@@ -53,4 +71,8 @@ struct AppDataResetRepositoryTests {
             configurations: ModelConfiguration(isStoredInMemoryOnly: true)
         )
     }
+}
+
+private enum ResetRepositoryTestError: Error {
+    case failed
 }
