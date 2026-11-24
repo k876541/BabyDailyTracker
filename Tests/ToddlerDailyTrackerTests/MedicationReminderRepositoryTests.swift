@@ -53,6 +53,24 @@ struct MedicationReminderRepositoryTests {
         #expect(plan.occurrences.count == 4)
     }
 
+    @Test("Replacing a plan preserves completed occurrences")
+    func replacePreservesCompletedOccurrences() throws {
+        let fixture = try makeFixture()
+        let original = try fixture.repository.create(draft: draft(), dates: [date(9), date(13)])
+        let completed = try #require(original.occurrences.first { $0.scheduledAt == date(9) })
+        try fixture.repository.complete(occurrenceID: completed.id, at: date(9, minute: 20))
+
+        let updated = try fixture.repository.replace(
+            planID: original.id,
+            draft: draft(),
+            dates: [date(17)]
+        )
+
+        #expect(updated.occurrences.map(\.id).contains(completed.id))
+        #expect(updated.occurrences.first { $0.id == completed.id }?.completedAt == date(9, minute: 20))
+        #expect(updated.occurrences.map(\.scheduledAt).sorted() == [date(9), date(17)])
+    }
+
     @Test("Today occurrences are chronological")
     func todayOccurrencesAreChronological() throws {
         let fixture = try makeFixture()
@@ -61,6 +79,18 @@ struct MedicationReminderRepositoryTests {
         let occurrences = try fixture.repository.occurrences(on: day, calendar: calendar)
 
         #expect(occurrences.map(\.scheduledAt) == [date(9), date(13), date(17)])
+    }
+
+    @Test("Today occurrences exclude inactive plans")
+    func todayOccurrencesExcludeInactivePlans() throws {
+        let fixture = try makeFixture()
+        let oldPlan = try fixture.repository.create(draft: draft(), dates: [date(9)])
+        try fixture.repository.end(planID: oldPlan.id, at: date(10))
+        let newPlan = try fixture.repository.create(draft: draft(), dates: [date(13)])
+
+        let occurrences = try fixture.repository.occurrences(on: day, calendar: calendar)
+
+        #expect(occurrences.map(\.id) == newPlan.occurrences.map(\.id))
     }
 
     @Test("Completing stores actual completion time")

@@ -169,7 +169,12 @@ private struct MedicationReminderEditor: View {
         NavigationStack {
             Form {
                 Section("療程") {
-                    DatePicker("開始日期", selection: $viewModel.draft.startDate, displayedComponents: .date)
+                    DatePicker(
+                        "開始日期",
+                        selection: $viewModel.draft.startDate,
+                        in: Calendar.current.startOfDay(for: .now)...,
+                        displayedComponents: .date
+                    )
                     Stepper(
                         "提醒 \(viewModel.draft.durationDays) 天",
                         value: $viewModel.draft.durationDays,

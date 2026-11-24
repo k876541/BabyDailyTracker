@@ -28,6 +28,30 @@ struct MedicationReminderCoordinatorTests {
         #expect(fixture.scheduler.fixed.isEmpty)
     }
 
+    @Test("Rejecting the first permission prompt does not create a course")
+    func rejectedPermissionRequestDoesNotCreateCourse() async throws {
+        let fixture = try makeFixture(authorization: .notDetermined)
+        fixture.scheduler.authorizationResult = false
+
+        await expectCoordinatorError(.notificationsDenied) {
+            try await fixture.coordinator.create(draft())
+        }
+
+        #expect(try fixture.repository.activePlan() == nil)
+        #expect(fixture.scheduler.fixed.isEmpty)
+    }
+
+    @Test("Past occurrences are rejected before persistence")
+    func pastOccurrencesAreRejectedBeforePersistence() async throws {
+        let fixture = try makeFixture(now: { date(10) })
+
+        await expectCoordinatorError(.occurrenceInPast) {
+            try await fixture.coordinator.create(draft(times: [time(9)]))
+        }
+
+        #expect(try fixture.repository.activePlan() == nil)
+    }
+
     @Test("Create schedules every occurrence")
     func createSchedulesAllOccurrences() async throws {
         let fixture = try makeFixture()
@@ -208,13 +232,18 @@ struct MedicationReminderCoordinatorTests {
         )
     }
 
+    private func time(_ hour: Int) -> MedicationReminderTime {
+        MedicationReminderTime(hour: hour, minute: 0)
+    }
+
     private func date(_ hour: Int, minute: Int = 0, dayOffset: Int = 0) -> Date {
         let base = calendar.date(byAdding: .day, value: dayOffset, to: day)!
         return calendar.date(bySettingHour: hour, minute: minute, second: 0, of: base)!
     }
 
     private func makeFixture(
-        authorization: MedicationNotificationAuthorization = .authorized
+        authorization: MedicationNotificationAuthorization = .authorized,
+        now: @escaping () -> Date = { Date.distantPast }
     ) throws -> Fixture {
         let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(
@@ -232,7 +261,8 @@ struct MedicationReminderCoordinatorTests {
             coordinator: MedicationReminderCoordinator(
                 repository: repository,
                 scheduler: scheduler,
-                calendar: calendar
+                calendar: calendar,
+                now: now
             )
         )
     }

@@ -85,6 +85,8 @@ final class MedicationReminderViewModel {
             load()
         } catch MedicationReminderCoordinatorError.notificationsDenied {
             errorMessage = "請允許通知權限，才能建立餵藥提醒。"
+        } catch MedicationReminderCoordinatorError.occurrenceInPast {
+            errorMessage = "提醒時間必須晚於現在。"
         } catch {
             errorMessage = "無法儲存餵藥提醒，請稍後再試。"
         }

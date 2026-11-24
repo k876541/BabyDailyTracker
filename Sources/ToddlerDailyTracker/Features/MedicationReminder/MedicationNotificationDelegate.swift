@@ -36,7 +36,7 @@ enum MedicationNotificationResponseRouter {
 #if os(iOS)
 import SwiftData
 import UIKit
-@preconcurrency import UserNotifications
+import UserNotifications
 
 @MainActor
 final class MedicationNotificationDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {

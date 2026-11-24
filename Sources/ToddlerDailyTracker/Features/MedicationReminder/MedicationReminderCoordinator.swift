@@ -2,6 +2,7 @@ import Foundation
 
 enum MedicationReminderCoordinatorError: Error, Equatable {
     case notificationsDenied
+    case occurrenceInPast
     case rollbackFailed
 }
 
@@ -21,19 +22,25 @@ final class MedicationReminderCoordinator: MedicationReminderCoordinating {
     private let repository: MedicationReminderRepository
     private let scheduler: MedicationNotificationScheduling
     private let calendar: Calendar
+    private let now: () -> Date
 
     init(
         repository: MedicationReminderRepository,
         scheduler: MedicationNotificationScheduling,
-        calendar: Calendar = .current
+        calendar: Calendar = .current,
+        now: @escaping () -> Date = Date.init
     ) {
         self.repository = repository
         self.scheduler = scheduler
         self.calendar = calendar
+        self.now = now
     }
 
     func create(_ draft: MedicationReminderDraft) async throws {
         let dates = try MedicationScheduleBuilder.occurrenceDates(for: draft, calendar: calendar)
+        guard dates.allSatisfy({ $0 > now() }) else {
+            throw MedicationReminderCoordinatorError.occurrenceInPast
+        }
         try await ensureAuthorization()
         let plan = try repository.create(draft: draft, dates: dates)
         do {
@@ -47,7 +54,11 @@ final class MedicationReminderCoordinator: MedicationReminderCoordinating {
     }
 
     func update(planID: UUID, draft: MedicationReminderDraft) async throws {
-        let newDates = try MedicationScheduleBuilder.occurrenceDates(for: draft, calendar: calendar)
+        let expandedDates = try MedicationScheduleBuilder.occurrenceDates(for: draft, calendar: calendar)
+        let newDates = expandedDates.filter { $0 > now() }
+        guard !newDates.isEmpty else {
+            throw MedicationReminderCoordinatorError.occurrenceInPast
+        }
         try await ensureAuthorization()
         guard let current = try repository.activePlan(), current.id == planID else {
             throw MedicationReminderRepositoryError.planNotFound
@@ -59,7 +70,10 @@ final class MedicationReminderCoordinator: MedicationReminderCoordinating {
             minimumIntervalMinutes: current.minimumIntervalMinutes,
             snoozeMinutes: current.snoozeMinutes
         )
-        let previousDates = current.occurrences.map(\.scheduledAt).sorted()
+        let previousDates = current.occurrences
+            .filter { $0.status != .completed }
+            .map(\.scheduledAt)
+            .sorted()
         let previousIDs = current.occurrences.map(\.id)
         scheduler.cancel(occurrenceIDs: previousIDs)
 

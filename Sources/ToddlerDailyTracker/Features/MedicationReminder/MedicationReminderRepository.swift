@@ -49,7 +49,10 @@ final class SwiftDataMedicationReminderRepository: MedicationReminderRepository 
     ) throws -> MedicationReminderPlan {
         let plan = try requirePlan(id: planID)
         for time in plan.times { context.delete(time) }
-        for occurrence in plan.occurrences { context.delete(occurrence) }
+        let completedOccurrences = plan.occurrences.filter { $0.status == .completed }
+        for occurrence in plan.occurrences where occurrence.status != .completed {
+            context.delete(occurrence)
+        }
 
         plan.startDate = draft.startDate
         plan.durationDays = draft.durationDays
@@ -60,9 +63,11 @@ final class SwiftDataMedicationReminderRepository: MedicationReminderRepository 
         plan.times = draft.times.map {
             MedicationReminderTimeModel(hour: $0.hour, minute: $0.minute, plan: plan)
         }
-        plan.occurrences = dates.map {
-            MedicationDoseOccurrence(scheduledAt: $0, plan: plan)
-        }
+        let completedDates = Set(completedOccurrences.map(\.scheduledAt))
+        let newOccurrences = dates
+            .filter { !completedDates.contains($0) }
+            .map { MedicationDoseOccurrence(scheduledAt: $0, plan: plan) }
+        plan.occurrences = completedOccurrences + newOccurrences
         try context.save()
         return plan
     }
@@ -72,7 +77,7 @@ final class SwiftDataMedicationReminderRepository: MedicationReminderRepository 
         return try allOccurrences()
             .filter { occurrence in
                 guard let interval else { return false }
-                return interval.contains(occurrence.scheduledAt)
+                return occurrence.plan?.isActive == true && interval.contains(occurrence.scheduledAt)
             }
             .sorted { $0.scheduledAt < $1.scheduledAt }
     }

@@ -16,6 +16,11 @@ BabyDailyTracker is a local-first SwiftUI app for recording a toddler's meals, s
 - Height and weight trends built with Swift Charts
 - Latest measurement and change from the previous valid measurement of the same type
 - Input validation for missing, non-numeric, zero, negative, and non-finite values
+- Fixed-time medication reminder courses with configurable start date and duration
+- Four- or five-hour minimum interval validation, including across midnight
+- Local notification actions for marking a reminder complete or snoozing it
+- Configurable snooze interval in five-minute steps and actual completion-time history
+- Up to 48 fixed reminder occurrences per course
 
 ## Architecture
 
@@ -35,6 +40,8 @@ BabyDailyTracker is a local-first SwiftUI app for recording a toddler's meals, s
 
 Open `ToddlerDailyTracker.xcodeproj`, select an iPhone simulator, and run the `ToddlerDailyTracker` scheme.
 
+Medication reminders require notification permission. The system controls whether notifications appear immediately as banners or are delayed by Focus or Notification Summary settings. Notification timing and actions should be verified on a simulator or device; the command-line build does not exercise delivery.
+
 ## Test
 
 ```sh
@@ -50,5 +57,7 @@ GitHub Actions runs the complete unit test suite and builds the iOS Simulator ap
 - WHO growth percentiles
 - Medical advice
 - Cloud sync or user accounts
-- Medication reminders and notification actions are planned for a later phase
+- Medicine names, dosage, units, photos, and multiple concurrent medication courses
+- Automatic rescheduling of later reminders after a late completion
+- Remote push notifications or cross-device reminder sync
 
