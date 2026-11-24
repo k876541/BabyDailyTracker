@@ -28,6 +28,9 @@
 		A10000000000000000000020 /* Features/MedicationReminder/MedicationReminderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000020 /* Features/MedicationReminder/MedicationReminderViewModel.swift */; };
 		A10000000000000000000021 /* Features/MedicationReminder/MedicationReminderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000021 /* Features/MedicationReminder/MedicationReminderView.swift */; };
 		A10000000000000000000022 /* Features/MedicationReminder/MedicationNotificationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000022 /* Features/MedicationReminder/MedicationNotificationDelegate.swift */; };
+		A10000000000000000000023 /* Features/Settings/AppDataResetRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000023 /* Features/Settings/AppDataResetRepository.swift */; };
+		A10000000000000000000024 /* Features/Settings/SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000024 /* Features/Settings/SettingsViewModel.swift */; };
+		A10000000000000000000025 /* Features/Settings/SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000025 /* Features/Settings/SettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -53,6 +56,9 @@
 		A20000000000000000000020 /* Features/MedicationReminder/MedicationReminderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/MedicationReminder/MedicationReminderViewModel.swift; sourceTree = "<group>"; };
 		A20000000000000000000021 /* Features/MedicationReminder/MedicationReminderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/MedicationReminder/MedicationReminderView.swift; sourceTree = "<group>"; };
 		A20000000000000000000022 /* Features/MedicationReminder/MedicationNotificationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/MedicationReminder/MedicationNotificationDelegate.swift; sourceTree = "<group>"; };
+		A20000000000000000000023 /* Features/Settings/AppDataResetRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Settings/AppDataResetRepository.swift; sourceTree = "<group>"; };
+		A20000000000000000000024 /* Features/Settings/SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Settings/SettingsViewModel.swift; sourceTree = "<group>"; };
+		A20000000000000000000025 /* Features/Settings/SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Settings/SettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -88,6 +94,9 @@
 				A20000000000000000000020 /* Features/MedicationReminder/MedicationReminderViewModel.swift */,
 				A20000000000000000000021 /* Features/MedicationReminder/MedicationReminderView.swift */,
 				A20000000000000000000022 /* Features/MedicationReminder/MedicationNotificationDelegate.swift */,
+				A20000000000000000000023 /* Features/Settings/AppDataResetRepository.swift */,
+				A20000000000000000000024 /* Features/Settings/SettingsViewModel.swift */,
+				A20000000000000000000025 /* Features/Settings/SettingsView.swift */,
 			);
 			path = Sources/ToddlerDailyTracker;
 			sourceTree = SOURCE_ROOT;
@@ -188,6 +197,9 @@
 				A10000000000000000000020 /* Features/MedicationReminder/MedicationReminderViewModel.swift in Sources */,
 				A10000000000000000000021 /* Features/MedicationReminder/MedicationReminderView.swift in Sources */,
 				A10000000000000000000022 /* Features/MedicationReminder/MedicationNotificationDelegate.swift in Sources */,
+				A10000000000000000000023 /* Features/Settings/AppDataResetRepository.swift in Sources */,
+				A10000000000000000000024 /* Features/Settings/SettingsViewModel.swift in Sources */,
+				A10000000000000000000025 /* Features/Settings/SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -37,8 +37,10 @@ final class MedicationReminderCoordinator: MedicationReminderCoordinating {
     }
 
     func create(_ draft: MedicationReminderDraft) async throws {
-        let dates = try MedicationScheduleBuilder.occurrenceDates(for: draft, calendar: calendar)
-        guard dates.allSatisfy({ $0 > now() }) else {
+        let expandedDates = try MedicationScheduleBuilder.occurrenceDates(for: draft, calendar: calendar)
+        let currentDate = now()
+        let dates = expandedDates.filter { $0 > currentDate }
+        guard !dates.isEmpty else {
             throw MedicationReminderCoordinatorError.occurrenceInPast
         }
         try await ensureAuthorization()
@@ -55,7 +57,8 @@ final class MedicationReminderCoordinator: MedicationReminderCoordinating {
 
     func update(planID: UUID, draft: MedicationReminderDraft) async throws {
         let expandedDates = try MedicationScheduleBuilder.occurrenceDates(for: draft, calendar: calendar)
-        let newDates = expandedDates.filter { $0 > now() }
+        let currentDate = now()
+        let newDates = expandedDates.filter { $0 > currentDate }
         guard !newDates.isEmpty else {
             throw MedicationReminderCoordinatorError.occurrenceInPast
         }

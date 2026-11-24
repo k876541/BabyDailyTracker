@@ -24,7 +24,7 @@ private struct AppRootView: View {
             case .needsBabyProfile:
                 BabyOnboardingView { name, birthday in viewModel.save(name: name, birthday: birthday) }
             case .ready:
-                MainTabView()
+                MainTabView { viewModel.showOnboarding() }
             }
         }
         .task { if viewModel.state == .loading { viewModel.load() } }
@@ -38,6 +38,7 @@ private struct AppRootView: View {
 private struct MainTabView: View {
     @Environment(\.modelContext) private var context
     @AppStorage(MedicationReminderNavigation.selectedTabKey) private var selectedTab = MainTabSelection.today.rawValue
+    let onReset: () -> Void
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -53,6 +54,9 @@ private struct MainTabView: View {
             NavigationStack { MedicationReminderView(context: context) }
                 .tabItem { Label("提醒", systemImage: "bell.badge") }
                 .tag(MainTabSelection.reminder.rawValue)
+            NavigationStack { SettingsView(context: context, onReset: onReset) }
+                .tabItem { Label("設定", systemImage: "gearshape") }
+                .tag(MainTabSelection.settings.rawValue)
         }
         .tint(BabyTheme.primary)
     }

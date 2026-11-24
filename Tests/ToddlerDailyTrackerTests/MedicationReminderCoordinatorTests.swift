@@ -52,6 +52,23 @@ struct MedicationReminderCoordinatorTests {
         #expect(try fixture.repository.activePlan() == nil)
     }
 
+    @Test("Create skips elapsed times today and keeps later days")
+    func createSkipsElapsedTimesTodayAndKeepsLaterDays() async throws {
+        let fixture = try makeFixture(now: { date(12, minute: 17) })
+
+        try await fixture.coordinator.create(draft(durationDays: 2))
+
+        let plan = try #require(try fixture.repository.activePlan())
+        #expect(plan.occurrences.map(\.scheduledAt).sorted() == [
+            date(13),
+            date(17),
+            date(9, dayOffset: 1),
+            date(13, dayOffset: 1),
+            date(17, dayOffset: 1)
+        ])
+        #expect(fixture.scheduler.fixed.map(\.date) == plan.occurrences.map(\.scheduledAt).sorted())
+    }
+
     @Test("Create schedules every occurrence")
     func createSchedulesAllOccurrences() async throws {
         let fixture = try makeFixture()
