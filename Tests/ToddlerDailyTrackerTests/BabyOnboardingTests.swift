@@ -51,6 +51,22 @@ struct BabyOnboardingTests {
         #expect(viewModel.state == .ready)
         #expect(repository.profile?.name == "小安")
     }
+
+    @Test("Reset completion returns to onboarding and resets the selected tab")
+    func resetCompletionReturnsToOnboarding() {
+        let suiteName = "BabyOnboardingTests.resetCompletionReturnsToOnboarding"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+        MedicationReminderNavigation.selectReminder(in: defaults)
+        let repository = InMemoryBabyProfileRepository(profile: BabyProfile(name: "小安", birthday: .now))
+        let viewModel = AppLaunchViewModel(repository: repository, defaults: defaults)
+        viewModel.load()
+
+        viewModel.showOnboarding()
+
+        #expect(viewModel.state == .needsBabyProfile)
+        #expect(MedicationReminderNavigation.selectedTab(in: defaults) == .today)
+    }
 }
 
 @MainActor

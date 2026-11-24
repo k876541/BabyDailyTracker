@@ -21,6 +21,8 @@ BabyDailyTracker is a local-first SwiftUI app for recording a toddler's meals, s
 - Local notification actions for marking a reminder complete or snoozing it
 - Configurable snooze interval in five-minute steps and actual completion-time history
 - Up to 48 fixed reminder occurrences per course
+- Same-day medication courses skip elapsed times and begin at the next future occurrence
+- Settings reset with two confirmations removes all local baby records and pending medication reminders
 
 ## Architecture
 
@@ -41,6 +43,8 @@ BabyDailyTracker is a local-first SwiftUI app for recording a toddler's meals, s
 Open `ToddlerDailyTracker.xcodeproj`, select an iPhone simulator, and run the `ToddlerDailyTracker` scheme.
 
 Medication reminders require notification permission. The system controls whether notifications appear immediately as banners or are delayed by Focus or Notification Summary settings. Notification timing and actions should be verified on a simulator or device; the command-line build does not exercise delivery.
+
+Removing baby data from Settings permanently clears the local profile, daily records, growth history, medication history, and pending medication notifications. This action cannot be undone.
 
 ## Test
 

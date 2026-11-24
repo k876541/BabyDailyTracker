@@ -5,6 +5,7 @@ enum MainTabSelection: Int, Sendable {
     case history
     case growth
     case reminder
+    case settings
 }
 
 enum MedicationReminderNavigation {
@@ -12,6 +13,10 @@ enum MedicationReminderNavigation {
 
     static func selectReminder(in defaults: UserDefaults = .standard) {
         defaults.set(MainTabSelection.reminder.rawValue, forKey: selectedTabKey)
+    }
+
+    static func selectToday(in defaults: UserDefaults = .standard) {
+        defaults.set(MainTabSelection.today.rawValue, forKey: selectedTabKey)
     }
 
     static func selectedTab(in defaults: UserDefaults = .standard) -> MainTabSelection {

@@ -75,10 +75,14 @@ enum AppLaunchState: Equatable {
 @Observable
 final class AppLaunchViewModel {
     private let repository: any BabyProfileRepository
+    private let defaults: UserDefaults
     var state: AppLaunchState = .loading
     var errorMessage: String?
 
-    init(repository: any BabyProfileRepository) { self.repository = repository }
+    init(repository: any BabyProfileRepository, defaults: UserDefaults = .standard) {
+        self.repository = repository
+        self.defaults = defaults
+    }
 
     func load() {
         do { state = try repository.fetchProfile() == nil ? .needsBabyProfile : .ready }
@@ -100,6 +104,11 @@ final class AppLaunchViewModel {
             errorMessage = "無法儲存寶寶資料：\(error.localizedDescription)"
         }
         return false
+    }
+
+    func showOnboarding() {
+        MedicationReminderNavigation.selectToday(in: defaults)
+        state = .needsBabyProfile
     }
 }
 
