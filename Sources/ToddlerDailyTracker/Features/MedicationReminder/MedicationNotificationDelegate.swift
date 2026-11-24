@@ -1,5 +1,24 @@
 import Foundation
 
+enum MainTabSelection: Int, Sendable {
+    case today
+    case history
+    case growth
+    case reminder
+}
+
+enum MedicationReminderNavigation {
+    static let selectedTabKey = "selectedMainTab"
+
+    static func selectReminder(in defaults: UserDefaults = .standard) {
+        defaults.set(MainTabSelection.reminder.rawValue, forKey: selectedTabKey)
+    }
+
+    static func selectedTab(in defaults: UserDefaults = .standard) -> MainTabSelection {
+        MainTabSelection(rawValue: defaults.integer(forKey: selectedTabKey)) ?? .today
+    }
+}
+
 enum MedicationNotificationResponseRoute: Equatable, Sendable {
     case completed(UUID)
     case snooze(UUID)
@@ -76,13 +95,16 @@ final class MedicationNotificationDelegate: NSObject, UIApplicationDelegate, UNU
     }
 
     private func handle(_ route: MedicationNotificationResponseRoute) async {
-        guard let coordinator else { return }
         switch route {
         case .completed(let id):
+            guard let coordinator else { return }
             try? await coordinator.complete(occurrenceID: id, at: .now)
         case .snooze(let id):
+            guard let coordinator else { return }
             try? await coordinator.snooze(occurrenceID: id, now: .now)
-        case .open, .ignored:
+        case .open:
+            MedicationReminderNavigation.selectReminder()
+        case .ignored:
             break
         }
     }

@@ -4,6 +4,17 @@ import Testing
 
 @Suite("Medication notification responses")
 struct MedicationNotificationResponseTests {
+    @Test("Direct notification taps select the reminder tab")
+    func directTapSelectsReminderTab() {
+        let suiteName = "MedicationNotificationResponseTests.directTapSelectsReminderTab"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+
+        MedicationReminderNavigation.selectReminder(in: defaults)
+
+        #expect(MedicationReminderNavigation.selectedTab(in: defaults) == .reminder)
+    }
+
     private let occurrenceID = UUID(uuidString: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")!
 
     @Test("Completed action routes the occurrence ID")

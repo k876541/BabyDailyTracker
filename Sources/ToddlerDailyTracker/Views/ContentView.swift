@@ -37,17 +37,22 @@ private struct AppRootView: View {
 
 private struct MainTabView: View {
     @Environment(\.modelContext) private var context
+    @AppStorage(MedicationReminderNavigation.selectedTabKey) private var selectedTab = MainTabSelection.today.rawValue
 
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             NavigationStack { TodayView(context: context) }
                 .tabItem { Label("日常", systemImage: "list.bullet.clipboard") }
+                .tag(MainTabSelection.today.rawValue)
             NavigationStack { HistoryView(context: context) }
                 .tabItem { Label("歷史", systemImage: "calendar") }
+                .tag(MainTabSelection.history.rawValue)
             NavigationStack { GrowthScreen(context: context) }
                 .tabItem { Label("成長", systemImage: "chart.xyaxis.line") }
+                .tag(MainTabSelection.growth.rawValue)
             NavigationStack { MedicationReminderView(context: context) }
                 .tabItem { Label("提醒", systemImage: "bell.badge") }
+                .tag(MainTabSelection.reminder.rawValue)
         }
         .tint(BabyTheme.primary)
     }

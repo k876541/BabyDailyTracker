@@ -75,9 +75,9 @@ final class MedicationReminderCoordinator: MedicationReminderCoordinating {
             .map(\.scheduledAt)
             .sorted()
         let previousIDs = current.occurrences.map(\.id)
-        scheduler.cancel(occurrenceIDs: previousIDs)
 
         let updated = try repository.replace(planID: planID, draft: draft, dates: newDates)
+        scheduler.cancel(occurrenceIDs: previousIDs)
         do {
             try await scheduleFixed(updated.occurrences)
         } catch {
