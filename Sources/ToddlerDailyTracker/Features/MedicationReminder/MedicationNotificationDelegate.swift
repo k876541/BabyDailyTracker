@@ -57,6 +57,19 @@ enum MedicationNotificationResponseRouter {
     }
 }
 
+struct MedicationNotificationResponseDispatcher: Sendable {
+    func dispatch(
+        _ route: MedicationNotificationResponseRoute,
+        handler: @escaping @MainActor @Sendable (MedicationNotificationResponseRoute) async -> Void,
+        completion: @escaping @Sendable () -> Void = {}
+    ) {
+        Task { @MainActor in
+            await handler(route)
+            completion()
+        }
+    }
+}
+
 #if os(iOS)
 import SwiftData
 import UIKit
@@ -82,21 +95,29 @@ final class MedicationNotificationDelegate: NSObject, UIApplicationDelegate, UNU
 
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
-        willPresent notification: UNNotification
-    ) async -> UNNotificationPresentationOptions {
-        [.banner, .sound]
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping @Sendable (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .sound])
     }
 
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
-        didReceive response: UNNotificationResponse
-    ) async {
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping @Sendable () -> Void
+    ) {
         let occurrenceID = response.notification.request.content.userInfo["occurrenceID"] as? String
         let route = MedicationNotificationResponseRouter.route(
             actionIdentifier: response.actionIdentifier,
             occurrenceID: occurrenceID
         )
-        await handle(route)
+        MedicationNotificationResponseDispatcher().dispatch(
+            route,
+            handler: { [weak self] route in
+                await self?.handle(route)
+            },
+            completion: completionHandler
+        )
     }
 
     private func handle(_ route: MedicationNotificationResponseRoute) async {

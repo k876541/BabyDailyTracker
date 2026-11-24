@@ -5,6 +5,25 @@ import Testing
 @MainActor
 @Suite("Medication notification scheduler")
 struct MedicationNotificationSchedulerTests {
+    @Test("Notification responses hop to the main actor before handling")
+    func notificationResponsesHopToMainActor() async {
+        let dispatcher = MedicationNotificationResponseDispatcher()
+        let route = MedicationNotificationResponseRoute.open(
+            UUID(uuidString: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")!
+        )
+        var receivedRoute: MedicationNotificationResponseRoute?
+
+        await withCheckedContinuation { continuation in
+            dispatcher.dispatch(route) { received in
+                MainActor.assertIsolated()
+                receivedRoute = received
+                continuation.resume()
+            }
+        }
+
+        #expect(receivedRoute == route)
+    }
+
     @Test("Fixed request contains occurrence ID and category")
     func fixedRequestContainsOccurrenceIDAndCategory() async throws {
         let center = RecordingNotificationCenter()
